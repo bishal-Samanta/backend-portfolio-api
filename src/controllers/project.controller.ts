@@ -10,11 +10,50 @@ const prisma = new PrismaClient();
 export const getProjects = async (req : Request , res : Response) : Promise<Response<HttpResponse>> =>{
     //console.log(`[${new Date().toLocaleString()}] Incoming ${req.method}${req.originalUrl} Request from ${req.rawHeaders[0]} ${req.rawHeaders[1]}`);
 
+    //Filtering data 
+    const { tag , search  } = req.query;
+
+    const filterOptions : any = {};
+
+    const modifiedTagToArray =  Array.isArray(tag) ? tag.map((el) => Number(el)) : [ Number(tag) ]
+
+
+    if(tag){
+      filterOptions.techstacks = {
+        some: {
+          id: {
+            in: modifiedTagToArray
+          }
+        }
+      }
+    }
+
+    if(search){
+      filterOptions.OR = [
+        {
+          title: {
+            contains: search,
+          },
+        },
+        {
+          content: {
+            contains: search,
+          },
+        },
+        {
+          sub_title: {
+            contains: search,
+          },
+        }
+      ];
+    }
+
     try{
        const projects = await prisma.project.findMany({
-        include : {
-            techstacks : true
-        }
+            include : {
+                techstacks : true
+            },
+            where : filterOptions
        });
        return res.status(Code.OK).send(
         new HttpResponse(Code.OK , Status.OK , "Projects data retrived" , projects )

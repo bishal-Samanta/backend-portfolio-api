@@ -12,10 +12,51 @@ export const getBlogs = async (
 ): Promise<Response<HttpResponse>> => {
   try {
     
+   //Filtering data 
+   const { tag , search  } = req.query;
+
+   const filterOptions : any = {};
+
+   const modifiedTagToArray =  Array.isArray(tag) ? tag.map((el) => Number(el)) : [ Number(tag) ]
+
+
+   if(tag){
+     filterOptions.tags = {
+       some: {
+         id: {
+           in: modifiedTagToArray
+         }
+       }
+     }
+   }
+
+   if(search){
+     filterOptions.OR = [
+       {
+         title: {
+           contains: search,
+         },
+       },
+       {
+         content: {
+           contains: search,
+         },
+       },
+       {
+         sub_title: {
+           contains: search,
+         },
+       }
+     ];
+   }
+
+
+    //Get all the data
     const blogs = await prisma.blog.findMany({
         include: {
             tags : true
-        }
+        },
+        where: filterOptions
     })
 
     return res
