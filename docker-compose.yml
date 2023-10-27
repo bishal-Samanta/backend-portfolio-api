@@ -1,0 +1,17 @@
+version: '3.9'  # Added the version to specify the Docker Compose version.
+
+services:
+  nodeapp:
+    container_name: nodeappcontainer
+    build:
+      context: .
+      target: ${NODE_ENV}
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    env_file:
+    - .env.${NODE_ENV} 
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      DATABASE_URL: ${DATABASE_URL}
+    volumes:
+      - ./:/usr/src/app
