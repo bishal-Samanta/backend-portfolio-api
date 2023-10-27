@@ -1,0 +1,68 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = [ "native","debian-openssl-1.1.x", "debian-openssl-3.0.x", "linux-musl", "linux-musl-openssl-3.0.x" ]
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+datasource db {
+  provider          = "mysql"
+  url               = env("DATABASE_URL")
+  relationMode      = "prisma"
+}
+
+
+///Project
+model Project {
+  id          Int       @id @default(autoincrement())
+  hero_image_link String
+  title          String
+  sub_title      String
+  content        String
+  date           DateTime
+  github_link    String
+  deployed_link  String
+  blog_link      String
+  type           String
+  techstacks TechStack[]
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
+}
+
+//Techstack
+model TechStack {
+  id          Int      @id @default(autoincrement())
+  description String
+  name        String
+  logo_link   String
+  projects    Project[]
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
+
+
+//Blog 
+model Blog {
+  id          Int      @id @default(autoincrement())
+  title       String
+  hero_image  String
+  sub_title   String?
+  content     String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  tags        Tag[]    // Establishing a many-to-many relationship with tags
+}
+
+
+//Tag
+model Tag {
+  id            Int      @id @default(autoincrement())
+  tag_name      String   @unique
+  tag_description String?
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+  blogs         Blog[]   // Establishing a many-to-many relationship with blogs
+}
+

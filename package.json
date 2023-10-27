@@ -1,0 +1,45 @@
+{
+  "name": "portfolio-bog-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start:build": "tsc -p .",
+    "start:development": "dotenv -e .env.development -- nodemon --exec ts-node src/index.ts",
+    "start:production": "dotenv -e .env.development -- tsc -p . && node dist/index.js",
+    "start:dev:local": "dotenv -e .env.test -- nodemon --exec ts-node src/index.ts",
+    "migrate:mysql:dev": "dotenv -e .env.development -- npx prisma migrate dev --name init",
+    "docker:dev": "dotenv -e .env.development -- docker compose up --build -d",
+    "docker:prod": "dotenv -e .env.production -- docker compose up --build -d",
+    "migrate:mysql:prod": "dotenv -e .env.production -- npx prisma migrate dev --name init",
+    "push:planetscale": "dotenv -e .env.test -- npx prisma db push"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^5.5.2",
+    "@types/morgan": "^1.9.7",
+    "@types/swagger-jsdoc": "^6.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "dotenv-cli": "^7.3.0",
+    "express": "^4.18.2",
+    "ip": "^1.1.8",
+    "morgan": "^1.10.0",
+    "mysql2": "^3.6.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.15",
+    "@types/express": "^4.17.20",
+    "@types/ip": "^1.1.2",
+    "@types/swagger-ui-express": "^4.1.5",
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.0.1",
+    "prisma": "^5.5.2",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  }
+}
