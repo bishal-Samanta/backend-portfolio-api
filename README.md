@@ -9,7 +9,7 @@ Welcome to the My Portfolio API! This project is built using Node.js, Typescript
 - Express
 - Swagger (Documentation)
 - Prisma ORM
-- MySQL (database)
+- MySQL (database) -> Hosted on PlanetScale 
 - Docker
 
 ## API Routes
