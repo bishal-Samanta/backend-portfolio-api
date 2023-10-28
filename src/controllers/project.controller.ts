@@ -10,56 +10,121 @@ const prisma = new PrismaClient();
 export const getProjects = async (req : Request , res : Response) : Promise<Response<HttpResponse>> =>{
     //console.log(`[${new Date().toLocaleString()}] Incoming ${req.method}${req.originalUrl} Request from ${req.rawHeaders[0]} ${req.rawHeaders[1]}`);
 
-    //Filtering data 
-    const { tag , search  } = req.query;
+    // //Filtering data 
+    // const { tag , search  } = req.query;
 
-    const filterOptions : any = {};
+    // const filterOptions : any = {};
 
-    const modifiedTagToArray =  Array.isArray(tag) ? tag.map((el) => Number(el)) : [ Number(tag) ]
+    // const modifiedTagToArray =  Array.isArray(tag) ? tag.map((el) => Number(el)) : [ Number(tag) ]
 
 
-    if(tag){
-      filterOptions.techstacks = {
-        some: {
-          id: {
-            in: modifiedTagToArray
-          }
-        }
-      }
-    }
+    // if(tag){
+    //   filterOptions.techstacks = {
+    //     some: {
+    //       id: {
+    //         in: modifiedTagToArray
+    //       }
+    //     }
+    //   }
+    // }
 
-    if(search){
-      filterOptions.OR = [
-        {
-          title: {
-            contains: search,
-          },
-        },
-        {
-          content: {
-            contains: search,
-          },
-        },
-        {
-          sub_title: {
-            contains: search,
-          },
-        }
-      ];
-    }
+    // if(search){
+    //   filterOptions.OR = [
+    //     {
+    //       title: {
+    //         contains: search,
+    //       },
+    //     },
+    //     {
+    //       content: {
+    //         contains: search,
+    //       },
+    //     },
+    //     {
+    //       sub_title: {
+    //         contains: search,
+    //       },
+    //     }
+    //   ];
+    // }
+
+    //Query Paramas
+   const { tag , search , page , limit } = req.query;
+
+   const filterOptions : any = {
+    where: {}, 
+   };
+
+   const modifiedTagToArray =  Array.isArray(tag) ? tag.map((el) => Number(el)) : [ Number(tag) ]
+
+   //Give 10 data by default based on the page value
+   if(page  && !limit){
+    const defaultData = 10
+    const skip = (Number(page) - 1) * defaultData;
+    filterOptions.skip = skip;
+    filterOptions.take = Number(defaultData);
+   }
+
+   if(!page && limit){
+    const skip = 0
+    filterOptions.skip = skip;
+    filterOptions.take = Number(limit);
+   }
+
+   //Give dynatic data 
+   else if(page && limit){
+    const skip = (Number(page) - 1) * Number(limit);
+    filterOptions.skip = skip;
+    filterOptions.take = Number(limit);
+   }
+
+   
+
+  
+   if(tag){
+     filterOptions.where.techstacks = {
+       some: {
+         id: {
+           in: modifiedTagToArray
+         }
+       }
+     }
+   }
+
+   if(search){
+     filterOptions.where.OR = [
+       {
+         title: {
+           contains: search,
+         },
+       },
+       {
+         content: {
+           contains: search,
+         },
+       },
+       {
+         sub_title: {
+           contains: search,
+         },
+       }
+     ];
+   }
 
     try{
        const projects = await prisma.project.findMany({
             include : {
                 techstacks : true
             },
-            where : filterOptions
+            ...filterOptions
        });
        return res.status(Code.OK).send(
         new HttpResponse(Code.OK , Status.OK , "Projects data retrived" , projects )
        )
     }
     catch(err : any ){
+
+        console.log(err)
         return res.status(Code.INTERNAME_SERVER_ERROR).send(
            new HttpResponse(Code.INTERNAME_SERVER_ERROR , Status.INTERNAL_SERVER_ERROR , "An internal error occored from catch block!",{ error: err }  )
         )

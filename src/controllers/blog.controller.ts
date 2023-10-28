@@ -12,16 +12,41 @@ export const getBlogs = async (
 ): Promise<Response<HttpResponse>> => {
   try {
     
-   //Filtering data 
-   const { tag , search  } = req.query;
+   //Query Paramas
+   const { tag , search , page , limit } = req.query;
 
-   const filterOptions : any = {};
+   const filterOptions : any = {
+    where: {}, 
+   };
 
    const modifiedTagToArray =  Array.isArray(tag) ? tag.map((el) => Number(el)) : [ Number(tag) ]
 
+   //Give 10 data by default based on the page value
+   if(page  && !limit){
+    const defaultData = 10
+    const skip = (Number(page) - 1) * defaultData;
+    filterOptions.skip = skip;
+    filterOptions.take = Number(defaultData);
+   }
 
+   if(!page && limit){
+    const skip = 0
+    filterOptions.skip = skip;
+    filterOptions.take = Number(limit);
+   }
+
+   //Give dynatic data 
+   else if(page && limit){
+    const skip = (Number(page) - 1) * Number(limit);
+    filterOptions.skip = skip;
+    filterOptions.take = Number(limit);
+   }
+
+   
+
+  
    if(tag){
-     filterOptions.tags = {
+     filterOptions.where.tags = {
        some: {
          id: {
            in: modifiedTagToArray
@@ -31,7 +56,7 @@ export const getBlogs = async (
    }
 
    if(search){
-     filterOptions.OR = [
+     filterOptions.where.OR = [
        {
          title: {
            contains: search,
@@ -56,7 +81,8 @@ export const getBlogs = async (
         include: {
             tags : true
         },
-        where: filterOptions
+        ...filterOptions,
+       
     })
 
     return res
