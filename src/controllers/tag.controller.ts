@@ -10,8 +10,57 @@ export const getTags = async (
   req: Request,
   res: Response
 ): Promise<Response<HttpResponse>> => {
+
+  const { search , page , limit } = req.query;
+
+  const filterOptions : any = {
+    where: {}, 
+  };
+
+  //Give 10 data by default based on the page value
+  if(page  && !limit){
+    const defaultData = 10
+    const skip = (Number(page) - 1) * defaultData;
+    filterOptions.skip = skip;
+    filterOptions.take = Number(defaultData);
+   }
+
+   if(!page && limit){
+    const skip = 0
+    filterOptions.skip = skip;
+    filterOptions.take = Number(limit);
+   }
+
+   //Give dynatic data 
+   else if(page && limit){
+    const skip = (Number(page) - 1) * Number(limit);
+    filterOptions.skip = skip;
+    filterOptions.take = Number(limit);
+   }
+
+
+   if(search){
+    filterOptions.where.OR = [
+      {
+        tag_name: {
+          contains: search,
+        },
+      },
+      {
+        tag_description: {
+          contains: search,
+        },
+      }
+    ];
+  }
+
+
+
+
   try {
-    const tags = await prisma.tag.findMany();
+    const tags = await prisma.tag.findMany({
+      ...filterOptions
+    });
     return res
       .status(Code.OK)
       .send(new HttpResponse(Code.OK, Status.OK, "Tags Data retrived!", tags));
